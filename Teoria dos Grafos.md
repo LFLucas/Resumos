@@ -322,6 +322,29 @@ O Grafo H é Hamiltoniano pois nenhum vertice se repete `v1,v4,v5,v2,v3,v1`
 5. insira seus adjacentes na lista
 6. retorne ao passo 2 enquanto a lista nao estiver vazia
 
+``` python
+Grafo = {'0': [['1',1],['2',2],['3',3]],
+         '1': [['4',4]],
+         '2': [['4',5]],
+         '3': [['4',6]],
+         '4': [['5',2]],
+         '5': [] }
+
+def busca_largura(G, v_i):
+    v=[]
+    p=[v_i]
+
+    while p:
+        ver=p.pop(0)
+        if ver[0] not in v:
+            v.append(ver[0])
+            for i, j in G[ver[0]]:
+                if i not in v:
+                    p.append(i)
+    print(v)
+    return v
+```
+
 
 
 
@@ -333,6 +356,29 @@ O Grafo H é Hamiltoniano pois nenhum vertice se repete `v1,v4,v5,v2,v3,v1`
 4. marque o como visitado
 5. insira seus adjacentes a lista
 6. retorne ao passo 2 ate que a lista fique vazia
+
+``` python
+Grafo = {'0': [['1',1],['2',2],['3',3]],
+         '1': [['4',4]],
+         '2': [['4',5]],
+         '3': [['4',6]],
+         '4': [['5',2]],
+         '5': [] }
+
+def busca_profundidade(G, v_i):
+    v = []
+    p = [v_i]
+
+    while p:
+        ver = p.pop()
+        if ver[0] not in v:
+            v.append(ver[0])
+            for i,j in G[ver[0]]:
+                if i not in v:
+                    p.append(i)
+    print(v)
+    return v
+```
 
 
 
@@ -374,12 +420,75 @@ uma arvore geradora minima usa a aresta mais leve das arestas seguras
 ## Algoritmo de prim
 O algoritmo de prim usa a tecnica do corte para selecionar as arestas modificando o corte a cada passo ate que todos os vertices estejam na arvore
 
+``` python
+Grafo = {'0': [['1',1],['2',2],['3',3]],
+         '1': [['4',4]],
+         '2': [['4',5]],
+         '3': [['4',6]],
+         '4': [['5',2]],
+         '5': [] }
+
+def prim(G, v_i):
+    vis = []
+    v = v_i
+    a = []
+    arv = []
+    while len(arv)< len(G.keys())-1:
+        for adj, peso in G[v]:
+            if adj not in vis:
+                a.append((v, adj, peso))
+        vis.append(v)
+        aresta = min(a, key=lambda x: x[2])
+        a.pop(a.index(aresta))
+        v = aresta[1]
+        arv.append(aresta)
+    return arv
+```
+
 
 
 
 
 ## Algoritmo de Kruskal
 O algoritmo de kruskal seleciona sempre oas aresta mais leves de todo o grafo ate formar a arvore geradora minima
+
+```python
+Grafo = {'0': [['1',1],['2',2],['3',3]],
+         '1': [['4',4]],
+         '2': [['4',5]],
+         '3': [['4',6]],
+         '4': [['5',2]],
+         '5': [] }
+
+def kruskal(G):
+    arvore = []
+    ar = []
+    seq = {v: v for v in G.keys()}
+
+    for v, aresta in G.items():
+        for a, p in aresta:
+            ar.append((v,a,p))
+            print((v,a,p))
+
+    ar.sort(key=lambda x: x[2])
+
+    def procurar(ver):
+        if seq[ver] != ver:
+            seq[ver] = procurar(seq[ver])
+        return seq[ver]
+
+    def unir(orig, dest):
+        r_orig = procurar(orig)
+        r_dest = procurar(dest)
+        seq[r_orig] = r_dest
+
+    for orig, dest, peso in ar:
+        if procurar(orig) != procurar(dest):
+            arvore.append((orig, dest, peso))
+            unir(orig, dest)
+
+    return arvore
+```
 
 
 
@@ -397,6 +506,39 @@ Algoritmo:
 4. adiciona o ao conjunto
 5. retorna ao passo 1 ate todos os vertices serem visitados
 
+```python
+Grafo = {'0': [['1',1],['2',2],['3',3]],
+         '1': [['4',4]],
+         '2': [['4',5]],
+         '3': [['4',6]],
+         '4': [['5',2]],
+         '5': [] }
+
+def kahn(G):
+    ordem = []
+    fila = []
+    dependencias = {v: 0 for v in G.keys()}
+
+    for vertice in G.keys():
+        for adjacente, peso in G[vertice]:
+            dependencias[adjacente] += 1
+
+    for vertice, dependencia in dependencias.items():
+        if dependencia == 0:
+            fila.insert(0, vertice)
+
+    while fila:
+        vertice = fila.pop()
+        for adjacente, peso in G[vertice]:
+            dependencias[adjacente] -= 1
+            if dependencias[adjacente] == 0:
+                fila.insert(0, adjacente)
+        ordem.append(vertice)
+    if all(vertice in ordem for vertice in G.keys()):
+        return ordem
+    return None
+```
+
 
 
 
@@ -411,3 +553,49 @@ Distancia acumulado e o somatorio dos pesos de todas as arestas entre dois verti
 5. repita o processo
 
 ![Algoritmo de Dijkstra](images/image-23.png)
+
+```python
+from math import inf
+
+grafo = [
+    [0, 2, 3, 0, 6, 0, 0, 0, 0, 0, 4 ],
+    [2, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0 ],
+    [3, 0, 0, 0, 0, 0, 0, 5, 0, 0, 9 ],
+    [0, 9, 0, 0, 0, 6, 0, 0, 0, 0, 0 ],
+    [6, 0, 0, 0, 0, 8, 0, 0, 0, 0, 7 ],
+    [0, 0, 0, 6, 8, 0, 5, 0, 0, 0, 0 ],
+    [0, 0, 0, 0, 0, 5, 0, 3, 11,0, 10],
+    [0, 0, 5, 0, 0, 0, 3, 0, 0, 2, 0 ],
+    [0, 0, 0, 0, 0, 0, 11,0, 0, 3, 0 ],
+    [0, 0, 0, 0, 0, 0, 0, 2, 3, 0, 0 ],
+    [4, 0, 9, 0, 7, 0, 10,0, 0, 0, 0 ]
+]
+
+def menor_caminho(G, o, d):
+    d_ac = [inf for v in range(len(G))]
+    ant = list(range(len(G)))
+    exp = [False] * len(G)
+
+    d_ac[o] = 0
+    cam = []
+
+    ver = o
+    while not all(exp):
+        exp[ver]=True
+        for adj, p in enumerate(G[ver]):
+            if not exp[adj] and p != 0:
+                if d_ac[ver] + p < d_ac[adj]:
+                    d_ac[adj] = d_ac[ver] + p
+                    ant[adj] = ver
+        ver = min(enumerate(d_ac),
+            key=lambda x: x[1] if not exp[x[0]] else inf)[0]
+
+    ver = d
+    while ant[ver] != ver:
+        cam.insert(0, ver)
+        ver = ant[ver]
+
+    cam.insert(0, o)
+
+    return cam, d_ac[d]
+```
